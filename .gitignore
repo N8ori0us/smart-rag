@@ -1,0 +1,26 @@
+# Python System & Dependency Caches
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# macOS System & Desktop Metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Visual Studio Code & IDE Workspaces
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+
+# Runtime Logs and Caches
+*.log
+.cache/
