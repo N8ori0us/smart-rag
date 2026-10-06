@@ -65,6 +65,7 @@ class ConversationEngine:
         headers = {
             "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
             "Content-Type": "application/json",
+            "USER-AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",  
             "HTTP-Referer": "http://localhost:8080",
             "X-Title": "smart-rag-engine"
         }
