@@ -10,7 +10,6 @@ class ConversationEngine:
         self.counter = 0        # Tracks the number of interactions
         self.history = []       # Stores the conversation history
         self.api_url = "https://openrouter.ai/api/v1/chat/completions"
-        self.model_target = "google/gemini-1.5-flash:free"
 
     def get_system_prompt(self):
         # Dynamically altrnate prompt framework based on the current mode
@@ -41,42 +40,43 @@ class ConversationEngine:
         if not api_key:
             return "Error: Local .env is missing or OPENROUTER_API_KEY is uninitialized."
         
+        model_target = "google/gemma-4-31b-it:free" if self.mode == "ideate" else "cohere/north-mini-code:free"
+
         # Manage loop interception automation
-        if self.mode == "ideate":
+        if self.mode=="ideate":
             self.counter += 1
 
-        # Compile system rules
+        #Compile system payloads using native Python standard network libraries
         system_rules = self.get_system_prompt()
         
-        # Build a single clean message stream array structure
-        messages = [
-            {"role": "system", "content": system_rules}
+        #Build the standard message payload structure
+        messages =[
+            {"role": "system", "content": system_rules},
         ]
 
-        # Append historical logs sequentially if any exist
-        for past_turn in self.history:
-            messages.append(past_turn)
+        # Append historical context logs sequentially to maintain memory parity
+        for past_count in self.history:
+            messages.append(past_count)
 
-        # Inject context directly into the final active user turn payload
         if local_context:
-            final_content = f"Context:\n{local_context}\n\nQuery: {user_prompt}"
+            final_context = f"{local_context}\n\nQuery: {user_prompt}"
         else:
-            final_content = user_prompt
+            final_context = user_prompt
 
         # Append the properly shaped final user block to the message stream
-        messages.append({"role": "user", "content": final_content})
+        messages.append({"role": "user", "content": final_context})
 
-        # Set up standard OpenRouter authorization and browser spoof headers
+        #Set up stabdard OpenRouter authorization headers
         headers = {
-            "Authorization": f"Bearer {api_key}",
+            "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
             "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "USER-AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",  
             "HTTP-Referer": "http://localhost:8080",
             "X-Title": "smart-rag-engine"
         }
         
         payload = {
-            "model": self.model_target,
+            "model": model_target,
             "messages": messages
         }
 
@@ -104,7 +104,7 @@ class ConversationEngine:
 
             # Append interceptor alerts to the final output if flagged
             if interceptor_active:
-                alert_prefix = "\n\n🚨 [This line of inquiry has been logged for later review. Do you want to continue this now or get back to what you were doing in execution mode?]"
+                alert_prefix = "\n\n🚨 [This line of inquery has been logged for later review. do you want to continue this now or get back to what you were doing in execution mode?]"
                 return ai_response + alert_prefix
 
             return ai_response
