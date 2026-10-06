@@ -47,7 +47,6 @@ class ConversationEngine:
 
         #Compile system payloads using native Python standard network libraries
         system_rules = self.get_system_prompt()
-        full_context = f"Context:\n{local_context}n\nQuery : {user_prompt}" if local_context else user_prompt
         
         #Build the standard message payload structure
         messages =[
@@ -58,8 +57,13 @@ class ConversationEngine:
         for past_count in self.history:
             messages.append(past_count)
 
-        # Add the current query block to the tail of the message stream        
-        messages.append({"role": "user", "content": full_context})
+        if local_context:
+            final_context = f"{local_context}\n\nQuery: {user_prompt}"
+        else:
+            final_context = user_prompt
+
+        # Append the properly shaped final user block to the message stream
+        messages.append({"role": "user", "content": final_context})
 
         #Set up stabdard OpenRouter authorization headers
         headers = {
