@@ -40,7 +40,7 @@ class ConversationEngine:
         if not api_key:
             return "Error: Local .env is missing or OPENROUTER_API_KEY is uninitialized."
         
-        model_target = "google/gemma-4-31b-it:free" if self.mode == "ideate" else "cohere/north-mini-code:free"
+        model_target = "nvidia/nemotron-3.5-lightning:free" if self.mode == "ideate" else "cohere/north-mini-code:free"
 
         # Manage loop interception automation
         if self.mode=="ideate":
