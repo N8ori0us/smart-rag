@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  rag-engine:
+  rag-core:
     image: python:3.11-slim
-    container_name: rag-engine-container
+    container_name: smart-rag-container
     volumes:
       - .:/app
     working_dir: /app
