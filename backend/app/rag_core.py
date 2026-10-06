@@ -10,7 +10,7 @@ class ConversationEngine:
         self.counter = 0        # Tracks the number of interactions
         self.history = []       # Stores the conversation history
         self.api_url = "https://openrouter.ai/api/v1/chat/completions"
-        self.model_target = "google/gemini-1.5-flash"
+        self.model_target = "google/gemini-1.5-flash:free"
 
     def get_system_prompt(self):
         # Dynamically altrnate prompt framework based on the current mode
