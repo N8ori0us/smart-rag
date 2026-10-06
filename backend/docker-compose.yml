@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  rag-engine:
+    image: python:3.11-slim
+    container_name: rag-engine-container
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    command: tail -f /dev/null  # Keep the container running for development 
+    restart: unless-stopped
