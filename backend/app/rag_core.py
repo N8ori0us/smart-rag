@@ -42,34 +42,35 @@ class ConversationEngine:
             return "Error: Local .env is missing or OPENROUTER_API_KEY is uninitialized."
         
         # Manage loop interception automation
-        if self.mode=="ideate":
+        if self.mode == "ideate":
             self.counter += 1
 
-        #Compile system payloads using native Python standard network libraries
+        # Compile system rules
         system_rules = self.get_system_prompt()
         
-        #Build the standard message payload structure
-        messages =[
-            {"role": "system", "content": system_rules},
+        # Build a single clean message stream array structure
+        messages = [
+            {"role": "system", "content": system_rules}
         ]
 
-        # Append historical context logs sequentially to maintain memory parity
-        for past_count in self.history:
-            messages.append(past_count)
+        # Append historical logs sequentially if any exist
+        for past_turn in self.history:
+            messages.append(past_turn)
 
+        # Inject context directly into the final active user turn payload
         if local_context:
-            final_context = f"{local_context}\n\nQuery: {user_prompt}"
+            final_content = f"Context:\n{local_context}\n\nQuery: {user_prompt}"
         else:
-            final_context = user_prompt
+            final_content = user_prompt
 
         # Append the properly shaped final user block to the message stream
-        messages.append({"role": "user", "content": final_context})
+        messages.append({"role": "user", "content": final_content})
 
-        #Set up stabdard OpenRouter authorization headers
+        # Set up standard OpenRouter authorization and browser spoof headers
         headers = {
-            "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
-            "USER-AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",  
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             "HTTP-Referer": "http://localhost:8080",
             "X-Title": "smart-rag-engine"
         }
@@ -103,7 +104,7 @@ class ConversationEngine:
 
             # Append interceptor alerts to the final output if flagged
             if interceptor_active:
-                alert_prefix = "\n\n🚨 [This line of inquery has been logged for later review. do you want to continue this now or get back to what you were doing in execution mode?]"
+                alert_prefix = "\n\n🚨 [This line of inquiry has been logged for later review. Do you want to continue this now or get back to what you were doing in execution mode?]"
                 return ai_response + alert_prefix
 
             return ai_response
