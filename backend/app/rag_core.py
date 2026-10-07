@@ -1,115 +1,77 @@
 import os
-import sys
-import json
-import urllib.request
+from app.config import API_KEY, MODEL_TIERS
+from app.document_manager import DocumentManager
+from app.model_client import send_prompt_to_server
 
 class ConversationEngine:
     def __init__(self):
-        # Establish structural defaults matching README.md protocols
         self.mode = "ideate"    # Tracks: "ideate" or "execute" modes
-        self.counter = 0        # Tracks the number of interactions
-        self.history = []       # Stores the conversation history
-        self.api_url = "https://openrouter.ai/api/v1/chat/completions"
+        self.counter = 0        # Tracks interaction thresholds
+        self.history = []       # Stores conversation turns
+        self.doc_manager = DocumentManager()
 
     def get_system_prompt(self):
-        # Dynamically altrnate prompt framework based on the current mode
         if self.mode == "ideate":
             return (
-                "You are an empathetic, highly analytical, creative ideation assistant,"
-                "engineering collaborator, and teacher.Provide innovative and out-of-the-box"
-                "ideas to help define nebulous and ambiguous thoughts. Propose actionable" 
-                "potential design and development solutions. Keep their pace do not"
-                "rush ahead and ask clarifying questions to ensure you understand the"
-                "needs, goals, and intention and offer to provide step by step guidance."
+                "You are an empathetic, highly analytical, creative ideation assistant, "
+                "engineering collaborator, and teacher. Provide innovative and out-of-the-box "
+                "ideas to help define nebulous thoughts. Ask clarifying questions."
             )
         else:
             return (
                 "You are a pragmatic, straight-forward coding engineer and logic-based auditor. "
-                "Answer queries strictly using only verified technical data, context, or"
-                "historical relevance/precedent. Directly challenge malformed premises. Maintain"
-                "professional demeanor and uphold integrity to the facts and the truth without"
-                "compromising accuracy or objectivity or otherwise succumbing to customer"
-                "service sycophantic acquiescence. Provide set by step guidance, do not rush"
-                "ahead, and ask clarifying quetions to verify comprehension and confirm the"
-                "status of the tasks progress to ensure and maintain project alignment."
+                "Answer queries strictly using verified data. Challenge malformed premises. "
+                "Maintain professional demeanor without customer service sycophancy."
             )
         
-    def submit_query(self, user_prompt, local_context=""):
-        # Check security perimeter for the OpenRouter API authorization mask
-        api_key = os.getenv("OPENROUTER_API_KEY")
-        if not api_key:
+    def submit_query(self, user_prompt, use_rag=True):
+        if not API_KEY:
             return "Error: Local .env is missing or OPENROUTER_API_KEY is uninitialized."
         
-        model_target = "nvidia/nemotron-3.5-lightning:free" if self.mode == "ideate" else "cohere/north-mini-code:free"
-
-        # Manage loop interception automation
-        if self.mode=="ideate":
+        # Pull model assignment dynamically from config map
+        model_target = MODEL_TIERS[self.mode]
+        
+        if self.mode == "ideate":
             self.counter += 1
 
-        #Compile system payloads using native Python standard network libraries
         system_rules = self.get_system_prompt()
         
-        #Build the standard message payload structure
-        messages =[
-            {"role": "system", "content": system_rules},
-        ]
-
-        # Append historical context logs sequentially to maintain memory parity
-        for past_count in self.history:
-            messages.append(past_count)
+        local_context = ""
+        if use_rag:
+            local_context = self.doc_manager.retrieve_context(user_prompt)
 
         if local_context:
-            final_context = f"{local_context}\n\nQuery: {user_prompt}"
+            final_content = f"Context Data:\n{local_context}\n\nUser Query: {user_prompt}"
         else:
-            final_context = user_prompt
-
-        # Append the properly shaped final user block to the message stream
-        messages.append({"role": "user", "content": final_context})
-
-        #Set up stabdard OpenRouter authorization headers
-        headers = {
-            "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
-            "Content-Type": "application/json",
-            "USER-AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",  
-            "HTTP-Referer": "http://localhost:8080",
-            "X-Title": "smart-rag-engine"
-        }
+            final_content = user_prompt
+        
+        messages = [{"role": "system", "content": system_rules}]
+        for past_turn in self.history:
+            messages.append(past_turn)
+            
+        messages.append({"role": "user", "content": final_content})
         
         payload = {
             "model": model_target,
             "messages": messages
         }
 
-        # Check for loop interceptor thresholds before executing network calls
         interceptor_active = False
         if self.mode == "ideate" and self.counter >= 5:
             interceptor_active = True
             self.counter = 0
 
-        # Send the request and handle the response natively via urllib
-        try:
-            req = urllib.request.Request(
-                self.api_url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers=headers,
-                method="POST"
-            )
-            with urllib.request.urlopen(req, timeout=15) as response:
-                res_data = json.loads(response.read().decode("utf-8"))
-                ai_response = res_data['choices'][0]['message']['content']
+        # Pass payload safely over to the model client transport loop
+        ai_response = send_prompt_to_server(payload)
+        
+        if not ai_response.startswith("Error") and not ai_response.startswith("An HTTP error"):
+            self.history.append({"role": "user", "content": user_prompt})
+            self.history.append({"role": "assistant", "content": ai_response})
 
-                # Commit successful transaction to persistent history logs
-                self.history.append({"role": "user", "content": user_prompt})
-                self.history.append({"role": "assistant", "content": ai_response})
+        if interceptor_active:
+            alert_prefix = "\n\n🚨 [This line of inquiry has been logged. Continue now or return to execution mode?]"
+            return ai_response + alert_prefix
 
-            # Append interceptor alerts to the final output if flagged
-            if interceptor_active:
-                alert_prefix = "\n\n🚨 [This line of inquery has been logged for later review. do you want to continue this now or get back to what you were doing in execution mode?]"
-                return ai_response + alert_prefix
+        return ai_response
 
-            return ai_response
-        except Exception as e:
-            return f"An error occurred during the request: {str(e)}"
-
-# Instantiates the baseline instance of the state machine
 engine = ConversationEngine()
