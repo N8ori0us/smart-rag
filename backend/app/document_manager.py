@@ -35,22 +35,46 @@ class DocumentManager:
         return file_chunks
 
     def retrieve_context(self, query, top_k=3):
+        """Generates a query embedding and calculates cosine similarities across your documents."""
+        import math
+        from app.model_client import get_embedding
+
+        # 1. Transform the user's active search query into high-dimensional vector space
+        query_vector = get_embedding(query)
+        
+        # Calculate query magnitude (|B|) natively
+        query_mag = math.sqrt(sum(q * q for q in query_vector))
+        if query_mag == 0:
+            return ""
+
         all_chunks = self.read_local_documents()
         scored_chunks = []
-        query_words = set(query.lower().split())
 
         for chunk in all_chunks:
-            score = 0 
-            content_lower = chunk["content"].lower()
-            for word in query_words:
-                if word in content_lower:
-                    score += 1
-            if score > 0:
-                scored_chunks.append((score, chunk))
+            # 2. Transform the local document text chunk into a matching vector array over the wire
+            chunk_vector = get_embedding(chunk["content"])
+            
+            # 3. Calculate Dot Product (A · B) and Chunk Magnitude (|A|) simultaneously
+            dot_product = 0.0
+            chunk_sum_sq = 0.0
+            
+            for q, c in zip(query_vector, chunk_vector):
+                dot_product += q * c
+                chunk_sum_sq += c * c
+                
+            chunk_mag = math.sqrt(chunk_sum_sq)
+            if chunk_mag == 0:
+                continue
 
+            # 4. Compute the geometric Cosine Similarity score
+            cosine_similarity = dot_product / (chunk_mag * query_mag)
+            scored_chunks.append((cosine_similarity, chunk))
+
+        # Sort chunks sequentially from highest semantic correlation down to lowest
         scored_chunks.sort(key=lambda x: x[0], reverse=True)
+        
         selected_chunks = [
-            f"[{chunk['source']}]:\n{chunk['content']}\n---"
-            for _, chunk in scored_chunks[:top_k]
+            f"[{chunk['source']} (Semantic Match Score: {score:.4f})]:\n{chunk['content']}\n---"
+            for score, chunk in scored_chunks[:top_k]
         ]
         return "\n\n".join(selected_chunks)

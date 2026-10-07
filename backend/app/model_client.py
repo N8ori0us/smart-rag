@@ -4,6 +4,39 @@ import urllib.request
 import urllib.error
 from app.config import API_URL, HEADERS
 
+def get_embedding(text):
+    """Sends a text chunk over the wire to generate its mathematical array."""
+    from app.config import API_KEY, HEADERS
+    import json
+    import urllib.request
+
+    url = "https://openrouter.ai/api/v1/embeddings"
+
+    payload = {
+        "model": "openai/text-embedding-3-small",
+        "input": [text] if isinstance(text, str) else text    
+    }
+
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers=HEADERS,
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=15) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            data_list = res_data.get("data", [])
+
+            if isinstance(data_list, list) and len(data_list) > 0:
+                return data_list[0].get("embedding", [0.0] * 1536)
+
+            return [0.0] * 1536
+
+    except Exception as e:
+        print(f"⚠️  [Embedding Failure]: {str(e)}")
+        return [0.0] * 1536
+
 def send_prompt_to_server(payload):
     max_retries = 3
     backoff_delay = 2
