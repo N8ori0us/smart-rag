@@ -11,10 +11,8 @@ class ConversationEngine:
         # Path routing: check if running locally on Mac or inside server container        
         if os.getenv("RUNNING_LOCAL_MAC") == "true":
             self.session_manager = SessionManager(history_file="./data/history.json")
-            self.doc_manager.data_dir = "./data"
         else:
             self.session_manager = SessionManager(history_file="./app/data/history.json")
-            self.doc_manager.data_dir = "./app/data"
                    
         # Hydrate session parameters cleanly from the dedicated storage manager module
         session = self.session_manager.load_session()
