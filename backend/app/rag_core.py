@@ -1,17 +1,19 @@
 import os
 from app.config import API_KEY, MODEL_TIERS
-from app.document_manager import DocumentManager
 from app.model_client import send_prompt_to_server
 from app.session_manager import SessionManager
+from app.vector_client import VectorClient
 
 class ConversationEngine:
     def __init__(self):
-        self.doc_manager = DocumentManager()
+        self.vector_client = VectorClient()
+        
+        # Path routing: check if running locally on Mac or inside server container        
         if os.getenv("RUNNING_LOCAL_MAC") == "true":
-            self.session_manager = SessionManager(history_file="./data/histoy.json")
+            self.session_manager = SessionManager(history_file="./data/history.json")
             self.doc_manager.data_dir = "./data"
         else:
-            self.session_manager = SessionManager(history_file="./app/data/histoy.json")
+            self.session_manager = SessionManager(history_file="./app/data/history.json")
             self.doc_manager.data_dir = "./app/data"
                    
         # Hydrate session parameters cleanly from the dedicated storage manager module
@@ -55,7 +57,7 @@ class ConversationEngine:
         
         local_context = ""
         if use_rag:
-            local_context = self.doc_manager.retrieve_context(user_prompt)
+            local_context = self.vector_client.search_similarity(user_prompt)
 
         if local_context:
             final_content = f"Context Data:\n{local_context}\n\nUser Query: {user_prompt}"
@@ -88,7 +90,8 @@ class ConversationEngine:
             self.session_manager.save_session(self.mode, self.counter, self.history)
 
         if interceptor_active:
-            alert_prefix = "\n\n🚨 [This line of inquiry has been logged. Continue now or return to execution mode?]"
+            alert_prefix = "\n\n🚨 [This line of inquiry has been logged.]" 
+            # add to alert_prefix and implement <"Continue now or return to execution mode?">  during interactive build out. 
             return ai_response + alert_prefix
 
         return ai_response
