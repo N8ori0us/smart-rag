@@ -12,7 +12,7 @@ class ConversationEngine:
         if os.getenv("RUNNING_LOCAL_MAC") == "true":
             self.session_manager = SessionManager(history_file="./data/history.json")
         else:
-            self.session_manager = SessionManager(history_file="./app/data/history.json")
+            self.session_manager = SessionManager(history_file="/app/data/history.json")
                    
         # Hydrate session parameters cleanly from the dedicated storage manager module
         session = self.session_manager.load_session()
