@@ -6,6 +6,9 @@ __pycache__/
 venv/
 ENV/
 env/
+*.pyc
+*.pyo
+*.pyd
 
 # Exclude local knowledge documents and runtime session history saves
 backend/data/*
@@ -16,9 +19,13 @@ backend/app/*.json
 # Exclude sensitive environment configurations
 .env
 backend/.env
+data/
+backend/data/
 
 # macOS System & Desktop Metadata
 .DS_Store
+mac-manager/.xcworkspace/
+mac-manager/.xcuserdata/
 .AppleDouble
 .LSOverride
 ._*
@@ -29,6 +36,9 @@ backend/.env
 *.suo
 *.ntvs*
 *.njsproj
+.vscode/settings.json
+
+
 
 # Runtime Logs and Caches
 *.log

@@ -66,7 +66,11 @@ def send_prompt_to_server(payload):
                 total_elapsed = end_time - start_total_time
 
                 print(f"\n⏱️  [Metrics - API Latency: {latency:.2f}s | Total Script Runtime: {total_elapsed:.2f}s]")
-                return ai_response
+                return {
+                    "content": ai_response,
+                    "latency": latency,
+                    "total_elapsed": total_elapsed
+                }
 
         except urllib.error.HTTPError as e:
             if e.code == 429 and attempt < max_retries:

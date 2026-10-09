@@ -1,6 +1,7 @@
 import json
 import urllib.request
 from app.model_client import get_embedding
+from app.config import COLLECTION_NAME
 
 class VectorClient:
     def __init__(self, collection_name="smart_rag_collection"):
@@ -8,7 +9,7 @@ class VectorClient:
         self.base_url = "http://qdrant_db:6333"
 
     def create_collection(self):
-        """Explicitly initializes the 1536-dim vector table inside Qdrant if it is missing."""
+        # Explicitly initializes the 1536-dim vector table inside Qdrant if it is missing.
         url = f"{self.base_url}/collections/{self.collection_name}"
         payload = {
             "vectors": {
@@ -31,7 +32,7 @@ class VectorClient:
             return True
 
     def sync_documents(self, chunks):
-        """Pushes an array of text chunks into your database collection as vector points."""
+        # Pushes an array of text chunks into your database collection as vector points.
         # Ensure the vector table exists first
         self.create_collection()
         
@@ -71,14 +72,10 @@ class VectorClient:
             return False
 
     def search_similarity(self, query_text, top_k=3):
-        """generates a query vector and hits Qdrant's local REST API to execute a geometric search."""
-        import json
-        import urllib.request
-        from app.model_client import get_embedding
-
+        # Generates a query vector and hits Qdrant's local REST API to execute a geometric search.
         query_vector = get_embedding(query_text)
 
-        url = f"{self.base_url}/collections/{self.collection_name}/points/search"
+        url = f"http://qdrant_db:6333/collections/{COLLECTION_NAME}/points/search"
         payload = {
             "vector": query_vector,
             "limit": top_k,
@@ -95,18 +92,17 @@ class VectorClient:
             with urllib.request.urlopen(req, timeout=10) as response:
                 res_data = json.loads(response.read().decode("utf-8"))
                 results = res_data.get("result", [])
-
+                
+                # THE CONTRACT: Collect raw primitive data structures, zero text formatting
                 selected_chunks = []
-                for hit in results:
-                    score = hit.get("score", 0.0)
-                    payload_data = hit.get("payload", {})
-                    source = payload_data.get("source", "unknown")
-                    content= payload_data.get("content", "")
-
-                    selected_chunks.append(
-                        f"[{source} (Database Semantic Score: {score:.4f})]:\n{content}\n---"
-                    )
-                return "\n\n".join(selected_chunks)
+                for hit in results:                  
+                    selected_chunks.append({
+                        "score": hit.get("score", 0.0),
+                        "payload_data": hit.get("payload", {}),
+                        "source": hit.get("payload", {}).get("source", "unknown"),
+                        "content": hit.get("payload", {}).get("content", "")
+                    })
+                return selected_chunks
+            
         except Exception as e:
-            print(f"⚠️  [Qdrant Search Failure]: {str(e)}")
-            return ""
+            return []
