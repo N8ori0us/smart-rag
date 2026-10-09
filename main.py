@@ -44,11 +44,7 @@ def run_test_loop():
                 print(f"  [Metrics | API Latency: {latency:.2f}s | Total Script Runtime: {runtime:.2f}s]")
             else:
                 print(f"\n [Pipeline Error]: {output_packet}")
-
-            import json
-            print("\n[ Live RAM Data Package Received ]")
-            print(json.dumps(output_packet, indent=2, ensure_ascii=False))
-            
+      
         except KeyboardInterrupt:
             print("\nExecution interrupted by command. Session saved safely.")
             sys.exit(0)
