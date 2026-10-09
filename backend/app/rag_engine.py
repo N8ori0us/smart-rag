@@ -103,7 +103,7 @@ class RagEngine:
 
         total_elapsed = time.time() - start_time
 
-        # THE DATA CONTRACT: Pack fields into predictable dictionary keys for the UI layer
+        # Pack fields into predictable dictionary keys for the UI layer
         unified_output = {
             "response": {
                 "content": network_result["content"],

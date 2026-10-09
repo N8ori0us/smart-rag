@@ -5,7 +5,7 @@ import urllib.error
 from app.config import API_URL, HEADERS
 
 def get_embedding(text):
-    """Sends a text chunk over the wire to generate its mathematical array."""
+    # Sends a text chunk over the wire to generate its mathematical array.
     from app.config import API_KEY, HEADERS
     import json
     import urllib.request

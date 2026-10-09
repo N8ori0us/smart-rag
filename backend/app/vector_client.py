@@ -25,23 +25,23 @@ class VectorClient:
                 method="PUT"
             )
             with urllib.request.urlopen(req, timeout=5) as response:
-                print(f"📡 [Qdrant Setup]: Created collection '{self.collection_name}' successfully.")
+                print(f" [Qdrant Setup]: Created collection '{self.collection_name}' successfully.")
                 return True
         except Exception:
             # Collection already exists, proceed quietly
             return True
 
     def sync_documents(self, chunks):
-        # Pushes an array of text chunks into your database collection as vector points.
+        # Push an array of text chunks into the database collection as vector points.
         # Ensure the vector table exists first
         self.create_collection()
         
         if not chunks:
-            print("ℹ️  [Vector Client]: No chunks provided to index.")
+            print("  [Vector Client]: No chunks provided to index.")
             return False
 
         points = []
-        print(f"📦 [Vector Client]: Transforming {len(chunks)} chunks into vector points...")
+        print(f" [Vector Client]: Transforming {len(chunks)} chunks into vector points...")
 
         for idx, chunk in enumerate(chunks):
             vector_array = get_embedding(chunk["content"])
@@ -68,7 +68,7 @@ class VectorClient:
                 print(f"🚀 [Vector Client]: Successfully indexed {len(points)} points into Qdrant.")
                 return True
         except Exception as e:
-            print(f"⚠️  [Vector Client Failure]: Ingestion streaming crashed: {str(e)}")
+            print(f"  [Vector Client Failure]: Ingestion streaming crashed: {str(e)}")
             return False
 
     def search_similarity(self, query_text, top_k=3):

@@ -5,7 +5,7 @@ class DocumentManager:
         self.data_dir = data_dir
 
     def read_local_documents(self):
-        """Crawls your local data folder to find all markdown and text assets."""
+        # Crawls your local data folder to find all markdown and text assets.
         chunks = []
         if not os.path.exists(self.data_dir):
             return chunks 
@@ -23,7 +23,7 @@ class DocumentManager:
         return chunks
 
     def chunk_text(self, text, size=500, overlap=100, source_name=""):
-        """Splits raw text strings into fixed-size overlapping character segments."""
+        # Splits raw text strings into fixed-size overlapping character segments.
         file_chunks = []
         start = 0
         while start < len(text):
