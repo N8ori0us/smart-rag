@@ -32,7 +32,19 @@ def run_test_loop():
             
             # Execute the orchestrator
             output_packet = engine.submit_query(user_input, use_rag=False)
-            
+
+            if isinstance(output_packet, dict) and "response" in output_packet:
+                # CLEAN HUMAN PARSING: Extract and print only the text content response stream
+                print(f"\n Agent Response:\n{output_packet['response']['content']}\n")
+                
+                # Print clean, scannable processing metrics rows below the text block
+                metrics = output_packet.get("metrics", {})
+                latency = metrics.get("api_latency_seconds", 0.0)
+                runtime = metrics.get("total_runtime_seconds", 0.0)
+                print(f"  [Metrics | API Latency: {latency:.2f}s | Total Script Runtime: {runtime:.2f}s]")
+            else:
+                print(f"\n [Pipeline Error]: {output_packet}")
+
             import json
             print("\n[ Live RAM Data Package Received ]")
             print(json.dumps(output_packet, indent=2, ensure_ascii=False))
