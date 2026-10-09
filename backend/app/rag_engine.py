@@ -10,17 +10,22 @@ class RagEngine:
     def __init__(self):
         self.vector_client = VectorClient()
 
-        # Path routing: check if running locally on Mac or inside server container        
-        if os.getenv("RUNNING_LOCAL_MAC") == "true":
-            self.session_manager = SessionManager(history_file="./data/history.json")
+        # UNIFIED ENDPOINT DETECTOR: Determine the valid storage directory path natively
+        if os.path.exists("/.dockerenv") or os.path.exists("/app"):
+            storage_path = "/app/data/history.json"
+        elif os.getenv("RUNNING_LOCAL_MAC") == "true":
+            storage_path = "./data/history.json"
         else:
-            self.session_manager = SessionManager(history_file="/app/data/history.json")
+            storage_path = "./backend/data/history.json"
+
+        # Initialize the state manager using a single, unified string location reference
+        self.session_manager = SessionManager(history_file=storage_path)
                    
-        # Hydrate session parameters cleanly from the dedicated storage manager module
         session = self.session_manager.load_session()
         self.mode = session["mode"]
         self.counter = session["counter"]
         self.history = session["history"]
+
 
     def get_system_prompt(self):
         if self.mode == "ideate":
