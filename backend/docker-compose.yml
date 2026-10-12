@@ -7,6 +7,8 @@ services:
     working_dir: /app
     environment:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    ports:
+      -"8000:8000"
     command: tail -f /dev/null
     depends_on:
       - qdrant_db 

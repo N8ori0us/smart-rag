@@ -5,8 +5,16 @@ API_URL = "https://openrouter.ai/api/v1/chat/completions"
 API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 if not API_KEY:
-    # Check current directory (root) first, then look inside the backend subdirectory
-    for env_path in [".env", "backend/.env", "../.env"]:
+    # Explicitly calculate the absolute workspace root path dynamically at runtime
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    backend_dir = os.path.dirname(current_dir)
+    root_dir = os.path.dirname(backend_dir)
+    
+    for env_path in [
+        os.path.join(root_dir, ".env"),
+        os.path.join(backend_dir, ".env"),
+        ".env"
+    ]:
         if os.path.exists(env_path):
             try:
                 with open(env_path, "r", encoding="utf-8") as f:
