@@ -34,7 +34,7 @@ def get_embedding(text):
             return [0.0] * 1536
 
     except Exception as e:
-        print(f"⚠️  [Embedding Failure]: {str(e)}")
+        print(f"[Embedding Failure]: {str(e)}")
         return [0.0] * 1536
 
 def send_prompt_to_server(payload):
@@ -65,7 +65,7 @@ def send_prompt_to_server(payload):
                 latency = end_time - start_network_time
                 total_elapsed = end_time - start_total_time
 
-                print(f"\n⏱️  [Metrics - API Latency: {latency:.2f}s | Total Script Runtime: {total_elapsed:.2f}s]")
+                print(f"\n[Metrics - API Latency: {latency:.2f}s | Total Script Runtime: {total_elapsed:.2f}s]")
                 return {
                     "content": ai_response,
                     "latency": latency,
@@ -74,7 +74,7 @@ def send_prompt_to_server(payload):
 
         except urllib.error.HTTPError as e:
             if e.code == 429 and attempt < max_retries:
-                print(f"\n⚠️  [429 Rate Limited] Retry {attempt + 1}/{max_retries}. Pausing for {backoff_delay}s...")
+                print(f"\[429 Rate Limited] Retry {attempt + 1}/{max_retries}. Pausing for {backoff_delay}s...")
                 time.sleep(backoff_delay)
                 backoff_delay *= 2
                 continue

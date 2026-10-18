@@ -19,7 +19,7 @@ class DocumentManager:
                             text = f.read()
                             chunks.extend(self.chunk_text(text, source_name=file))
                     except Exception as e:
-                        print(f"⚠️  [Ingestion Warning] Could not read {file}: {str(e)}")
+                        print(f"[Ingestion Warning] Could not read {file}: {str(e)}")
         return chunks
 
     def chunk_text(self, text, size=500, overlap=100, source_name=""):

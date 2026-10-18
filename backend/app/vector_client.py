@@ -65,7 +65,7 @@ class VectorClient:
                 method="PUT"
             )
             with urllib.request.urlopen(req, timeout=15) as response:
-                print(f"🚀 [Vector Client]: Successfully indexed {len(points)} points into Qdrant.")
+                print(f"[Vector Client]: Successfully indexed {len(points)} points into Qdrant.")
                 return True
         except Exception as e:
             print(f"  [Vector Client Failure]: Ingestion streaming crashed: {str(e)}")
