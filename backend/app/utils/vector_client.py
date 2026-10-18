@@ -1,12 +1,12 @@
 import json
 import urllib.request
-from app.model_client import get_embedding
-from app.config import COLLECTION_NAME
+from app.adapters.embedding_client import get_embedding
+from app.core.config import VECTOR_DB_URL, COLLECTION_NAME
 
 class VectorClient:
-    def __init__(self, collection_name="smart_rag_collection"):
+    def __init__(self, collection_name = COLLECTION_NAME):
         self.collection_name = collection_name
-        self.base_url = "http://qdrant_db:6333"
+        self.base_url = VECTOR_DB_URL
 
     def create_collection(self):
         # Explicitly initializes the 1536-dim vector table inside Qdrant if it is missing.
@@ -75,7 +75,7 @@ class VectorClient:
         # Generates a query vector and hits Qdrant's local REST API to execute a geometric search.
         query_vector = get_embedding(query_text)
 
-        url = f"http://qdrant_db:6333/collections/{COLLECTION_NAME}/points/search"
+        url = f"{self.base_url}/collections/{self.collection_name}/points/search"
         payload = {
             "vector": query_vector,
             "limit": top_k,

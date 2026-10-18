@@ -8,7 +8,7 @@ import urllib.request
 import urllib.error
 
 # Pull centralized environment hooks from your configuration module
-from app.config import COLLECTION_NAME, VECTOR_DB_URL, API_URL
+from app.core.config import COLLECTION_NAME, VECTOR_DB_URL, API_URL
 
 def discover_system_hardware():
     """Queries the host operating system at runtime to dynamically assemble a

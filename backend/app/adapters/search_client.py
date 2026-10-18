@@ -2,7 +2,7 @@ import os
 import json
 import urllib.request
 import urllib.error
-from consensus_processor import ConsensusProcessor
+from app.processors.consensus_processor import ConsensusProcessor
 
 class WebSearchClient:
     def __init__(self) -> None:

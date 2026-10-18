@@ -1,14 +1,17 @@
 import os
 import time
-from app.config import API_KEY, MODEL_TIERS
-from app.model_client import send_prompt_to_server
+from app.config import MODEL_TIERS, API_KEY
+from app.model_client import OpenRouterClient
+from app.vector_client import QdrantVectorClient
 from app.session_manager import SessionManager
-from app.vector_client import VectorClient
-
+from app.search_client import WebSearchClient  # Inject your multi-endpoint tool logic
 
 class RagEngine:
     def __init__(self):
-        self.vector_client = VectorClient()
+        self.model_client = OpenRouterClient()
+        self.vector_client = QdrantVectorClient()
+        self.session_manager = SessionManager()
+        self.search_client = WebSearchClient()  # Ready for unbiased consensus clustering
 
         # Dynamic path topography: check if executing locally on a Mac, inside Docker, or bare Linux host
         if os.getenv("RUNNING_LOCAL_MAC") == "true":

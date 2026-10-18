@@ -1,14 +1,14 @@
 import sys
 import json
-from app.rag_engine import RagEngine
-from app.diagnostics import DiagnosticEngine
+from app.core.rag_engine import engine
+from diagnostics import DiagnosticEngine
 
 class TerminalInterface:
     def __init__(self):
         print("[SmartRAG System Init] Starting localized loop...")
         print("Type '/exit' to close, '/diagnose' for a raw readout, or '/audit' for AI health analysis.")
         
-        self.engine = RagEngine()
+        self.engine = engine
         self.diag_client = DiagnosticEngine()
         print(f"[Active State] Session hydrated. Current Mode: {self.engine.mode.upper()}")
 

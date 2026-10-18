@@ -1,12 +1,11 @@
 import os
 import time
-from app.core.config import API_KEY, MODEL_TIERS
+from app.core.config import API_KEY
 from app.adapters.model_client import OpenRouterClient
 from app.utils.vector_client import QdrantVectorClient
 from app.core.session_manager import SessionManager
 from app.adapters.search_client import WebSearchClient
 
-# Import the fully decoupled core handler matrix modules
 from app.core.behavioral_config import BehavioralConfig
 from app.processors.intent_classifier import IntentClassifier
 from app.processors.local_context_binder import LocalContextBinder
