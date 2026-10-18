@@ -3,7 +3,7 @@ services:
     image: python:3.11-slim
     container_name: smart-rag-container
     volumes:
-      - .app:/app
+      - .:/app
     working_dir: /app
     environment:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
