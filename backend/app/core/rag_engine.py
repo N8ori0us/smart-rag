@@ -2,7 +2,7 @@ import os
 import time
 from app.core.config import API_KEY
 from app.adapters.model_client import OpenRouterClient
-from app.utils.vector_client import QdrantVectorClient
+from app.utils.vector_client import VectorClient
 from app.core.session_manager import SessionManager
 from app.adapters.search_client import WebSearchClient
 
@@ -15,7 +15,7 @@ from app.adapters.llm_synthesizer import LlmSynthesizer
 class RagEngine:
     def __init__(self) -> None:
         self.model_client = OpenRouterClient()
-        self.vector_client = QdrantVectorClient()
+        self.vector_client = VectorClient()
         self.search_client = WebSearchClient()
         self.session_manager = SessionManager()
 
